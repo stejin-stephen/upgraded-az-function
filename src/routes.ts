@@ -1,25 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { getCurrentInvoke } from '@codegenie/serverless-express';
+import { healthEndpoint } from './libs/health';
 
 const router = Router();
-
-// User type
-type User = {
-  id: number;
-  name: string;
-};
-
-// Ephemeral in-memory data store
-const users: User[] = [
-  { id: 1, name: 'Stejin' },
-  { id: 2, name: 'Vibin' }
-];
-let userIdCounter = users.length;
-
-const getUser = (userId: string): User | undefined =>
-  users.find(u => u.id === parseInt(userId));
-const getUserIndex = (userId: string): number =>
-  users.findIndex(u => u.id === parseInt(userId));
 
 // Middleware
 router.use((require('express')).json());
@@ -35,52 +18,9 @@ router.get('/api', (req: Request, res: Response): void => {
   res.render('index', { apiUrl });
 });
 
-router.get('/api/users', (req: Request, res: Response): void => {
-  res.json(users);
-});
-
-router.get('/api/users/:userId', (req: Request, res: Response): void => {
-  const user = getUser(req.params.userId);
-  if (!user) {
-    res.status(404).json({});
-    return;
-  }
-  res.json(user);
-});
-
-router.post('/api/users', (req: Request, res: Response): void => {
-  const user: User = {
-    id: ++userIdCounter,
-    name: req.body.name
-  };
-  users.push(user);
-  res.status(201).json(user);
-});
-
-router.put('/api/users/:userId', (req: Request, res: Response): void => {
-  const user = getUser(req.params.userId);
-  if (!user) {
-    res.status(404).json({});
-    return;
-  }
-  user.name = req.body.name;
-  res.json(user);
-});
-
-router.delete('/api/users/:userId', (req: Request, res: Response): void => {
-  const userIndex = getUserIndex(req.params.userId);
-  if (userIndex === -1) {
-    res.status(404).json({});
-    return;
-  }
-  users.splice(userIndex, 1);
-  res.json(users);
-});
-
-router.get('/api/cookie', (req: Request, res: Response): void => {
-  res.cookie('Foo', 'bar');
-  res.cookie('Fizz', 'buzz');
-  res.json({});
+router.get('/api/data-direct/health', async (req: Request, res: Response): Promise<void> => {
+  const health = await healthEndpoint();
+  res.json(health)
 });
 
 export default router;

@@ -4,7 +4,7 @@
     "outDir": "HttpTrigger",
     "esModuleInterop": true,
     "allowJs": true,
-    "strict": true,
+    "strict": false,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
